@@ -79,6 +79,48 @@ void interface_load_one_thousand__random_words(hash_table *ht)
     }
 }
 
+void clear_input_buffer()
+{
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF)
+        ;
+}
+
+// Função para traduzir uma frase
+void interface_translate_phrase(hash_table *ht)
+{
+    char phrase[1024];
+    char *word;
+    const char delimiters[] = " \t\n";
+    char translated_phrase[2048] = "";
+
+    puts("Write phrase to translate:");
+    fgets(phrase, sizeof(phrase), stdin);
+
+    size_t len = strlen(phrase);
+    if (len > 0 && phrase[len - 1] == '\n')
+        phrase[len - 1] = '\0';
+
+    word = strtok(phrase, delimiters);
+    while (word != NULL)
+    {
+        dictionary *translated_word = hash_table_lookup(ht, word);
+        if (translated_word)
+        {
+            strncat(translated_phrase, translated_word->value, sizeof(translated_phrase) - strlen(translated_phrase) - 1);
+        }
+        else
+        {
+            strncat(translated_phrase, word, sizeof(translated_phrase) - strlen(translated_phrase) - 1);
+        }
+
+        strncat(translated_phrase, " ", sizeof(translated_phrase) - strlen(translated_phrase) - 1);
+
+        word = strtok(NULL, delimiters);
+    }
+
+    printf("Translated phrase: %s\n", translated_phrase);
+}
 
 void interface_print_initial_questions(int *selected_value)
 {
@@ -93,8 +135,10 @@ void interface_print_initial_questions(int *selected_value)
     puts("\t 4. Print Table: \t");
     puts("\t 5. Destroy Table: \t");
     puts("\t 6. Load 10.000 Words:\t");
+    puts("\t 7. Translate phrase:\t");
 
     scanf("%d", selected_value);
+    clear_input_buffer();
 }
 
 void interface_dispatch_actions(int selected_value, hash_table *ht)
@@ -118,6 +162,9 @@ void interface_dispatch_actions(int selected_value, hash_table *ht)
         break;
     case 6:
         interface_load_one_thousand__random_words(ht);
+        break;
+    case 7:
+        interface_translate_phrase(ht);
         break;
     default:
         puts("deu ruim");
